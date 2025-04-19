@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login and Sign Up</title>
+  <style>
+    /* General Body Styling */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: url('bank.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Logo and Company Name in Top Right Corner */
+    .top-right {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      text-align: right;
+      color: white;
+      z-index: 2;
+    }
+
+    .logo-container {
+      display: flex;
+      justify-content:right;
+      align-items: right;
+      margin-bottom: 30px;
+    }
+
+    /* Full Length Logo Styling - No Rotation */
+    .logo {
+      width: 120px; /* Adjust logo size */
+      height: auto;
+      margin-right: 20px;
+    }
+
+    /* Linear Gradient Background for Company Name and Logo */
+    .company-name {
+      font-size: 48px; /* Adjusted for a longer name */
+      font-weight: bold;
+      text-transform: uppercase;
+      background: linear-gradient(45deg, #ff007f, #00bfff, #f0f);
+      -webkit-background-clip: text;
+      color: transparent;
+      font-family: 'Arial', sans-serif;
+      letter-spacing: 5px;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
+      display: inline-block;
+    }
+
+    /* Background Overlay */
+    .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 0%;
+      background: rgba(0, 0, 0, 0.5); /* lightnes the background */
+      z-index: 1;
+    }
+
+    /* Form Styling */
+    .form-container {
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.7); /* Form background */
+      padding: 40px;
+      border-radius: 8px;
+      width: 350px; /* Slightly wider form */
+      text-align: center;
+    }
+
+    .tabs {
+      margin-bottom: 20px;
+    }
+
+    .tab-button {
+      background: none;
+      color: white;
+      border: 2px solid white;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+
+    .tab-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .form-section {
+      display: none;
+    }
+
+    #login-form {
+      display: block;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 4px;
+      background: #f1f1f1;
+      color: #333;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Footer */
+    footer {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+    }
+
+    footer button {
+      background-color: #ff0000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Logo and Company Name in Top Right Corner -->
+    <div class="top-center">
+      <div class="logo-container">
+        <img src="jdm.png" alt="Company Logo" class="logo">
+        <div class="company-name">JDM Credit And Finance</div> <!-- Full name of the company -->
+      </div>
+    </div>
+
+    <!-- Background Image Overlay -->
+    <div class="background-overlay"></div>
+
+    <!-- Main Form Section -->
+    <div class="form-container">
+      <!-- Login / Sign Up Toggle Buttons -->
+      <div class="tabs">
+        <button class="tab-button" onclick="showForm('login')">Login</button>
+        <button class="tab-button" onclick="showForm('signup')">Sign Up</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-form" class="form-section">
+        <h2>Login</h2>
+        <form id="login" action="#" method="POST" onsubmit="loginUser(event)">
+          <input type="email" id="login-email" placeholder="Email" name="email" required>
+          <input type="password" id="login-password" placeholder="Password" name="password" required>
+          <button type="submit">Login</button>
+        </form>
+      </div>
+
+      <!-- Sign Up Form -->
+      <div id="signup-form" class="form-section">
+        <h2>Sign Up</h2>
+        <form id="signup" action="#" method="POST" onsubmit="signUpUser(event)">
+          <input type="text" id="signup-name" placeholder="Full Name" name="name" required>
+          <input type="email" id="signup-email" placeholder="Email" name="email" required>
+          <input type="password" id="signup-password" placeholder="Password" name="password" required>
+          <button type="submit">Sign Up</button>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Footer or Sign Out Section -->
+    <footer>
+      <button onclick="signOut()">Sign Out</button>
+    </footer>
+  </div>
+
+  <script>
+    // Function to toggle between login and signup forms
+    function showForm(formType) {
+      const loginForm = document.getElementById('login-form');
+      const signupForm = document.getElementById('signup-form');
+
+      if (formType === 'login') {
+        loginForm.style.display = 'block';
+        signupForm.style.display = 'none';
+      } else if (formType === 'signup') {
+        signupForm.style.display = 'block';
+        loginForm.style.display = 'none';
+      }
+    }
+
+    // Function to handle Sign Up
+    function signUpUser(event) {
+      event.preventDefault(); // Prevent form submission
+
+      // Get user details from the form
+      const name = document.getElementById('signup-name').value;
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+
+      // Save user details to localStorage (in real app, it should be a database)
+      localStorage.setItem('user', JSON.stringify({ name, email, password }));
+
+      alert('User created successfully! You can now log in.');
+      showForm('login'); // Switch to login form after successful sign-up
+    }
+
+    // Function to handle Login
+    function loginUser(event) {
+      event.preventDefault(); // Prevent form submission
+
+      // Get entered login details
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      // Get user details from localStorage
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+
+      // Check if user exists and credentials match
+      if (storedUser && storedUser.email === email && storedUser.password === password) {
+        alert('Login successful!');
+
+          // Redirect to the frist page (can be any page you want)
+        window.location.href = 'fdbio.html'; // Replace 'firstpage.html' with your desired URL
+      } else {
+        alert('Invalid email or password.');
+      }
+    }
+
+    // Function to handle Sign Out
+    function signOut() {
+      alert('You have signed out.');
+      // You can clear session or localStorage data here if needed
+
+    
+    }
+  </script>
+</body>
+</html>
