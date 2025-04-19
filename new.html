@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Details Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="file"], input[type="number"], input[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .form-footer {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .submit-options {
+      display: flex;
+      justify-content: space-around;
+    }
+    .submit-options button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .submit-options button:hover {
+      background-color: #45a049;
+    }
+    .details-box {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    .details-box h3 {
+      margin-bottom: 10px;
+    }
+    .note-box {
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    .note-box h3 {
+      margin-bottom: 10px;
+    }
+    .exit-option {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="paymentFormContainer">
+    <h2>Payment Details Form</h2>
+
+    <!-- Display Pre-set Bank Details -->
+    <div class="details-box" id="bankDetails">
+      <h3>Bank Account Details:</h3>
+      <p><strong>Account Holder Name:</strong>JDM CREDIT AND FINANCE</p>
+      <p><strong>Bank Name:</strong>UCO BANK</p>
+      <p><strong>Account Number:</strong>04440210001936</p>
+      <p><strong>IFSC Code:</strong>UCBA0000444</p>
+    </div>
+
+    <!-- Note / Remark for Manual Payment -->
+    <div class="note-box">
+      <h3>Note:</h3>
+      <p>You can make the payment manually through the provided bank details. After making the payment, please call the owner of the application to confirm your payment. Once confirmed, kindly upload your payment screenshot here.</p>
+    </div>
+
+    <hr>
+
+    <!-- Payment Screenshot Option -->
+    <form id="paymentScreenshotForm">
+      <div class="form-group">
+        <label for="paymentScreenshot">Upload Payment Screenshot:</label>
+        <input type="file" id="paymentScreenshot" name="paymentScreenshot" accept="image/*" required>
+      </div>
+    </form>
+
+    <div class="form-footer">
+      <div class="submit-options">
+        <button type="button" onclick="submitForm()">Submit Payment Details</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exit Option after Submit -->
+  <div class="exit-option" id="exitOption">
+    <h3>Your payment details have been successfully submitted!</h3>
+    <button onclick="exitApplication()">Exit Application</button>
+  </div>
+
+  <script>
+    function submitForm() {
+      // Submit customer payment details
+      let customerName = prompt("Enter Customer Name:");
+      let paymentAmount = prompt("Enter Payment Amount:");
+      let paymentDate = prompt("Enter Payment Date (DD/MM/YYYY):");
+
+      alert("Payment Details Submitted:\n" +
+            "Customer Name: " + customerName + "\n" +
+            "Payment Amount: " + paymentAmount + "\n" +
+            "Payment Date: " + paymentDate);
+
+      // Hide the form details after submission
+      document.getElementById("paymentFormContainer").style.display = "none";
+
+      // Show the Exit option after form submission
+      document.getElementById("exitOption").style.display = "block";
+    }
+
+    function exitApplication() {
+      // Close the window or redirect the user to another page
+      window.close();  // This will close the current window
+      // Alternatively, you can redirect to another URL, like:
+      // window.location.href = 'https://www.example.com'; // Redirect to another page
+       // window.location.href = 'pdf.html'; // Redirect to another page
+    }
+  </script>
+
+</body>
+</html>
+

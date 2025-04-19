@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Application Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], input[type="number"], input[type="date"], select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .radio-group input {
+            margin-right: 10px;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #218838;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Deposit Application Form</h2>
+        <form id="depositForm">
+            <div class="form-group">
+                <label for="depositType">Select Deposit Type</label><br>
+                <input type="radio" id="fdOption" name="depositType" value="fd" checked onclick="toggleDepositType()">
+                <label for="fdOption">Fixed Deposit (FD)</label>
+                <input type="radio" id="rdOption" name="depositType" value="rd" onclick="toggleDepositType()">
+                <label for="rdOption">Recurring Deposit (RD)</label>
+            </div>
+
+            <!-- Common Fields -->
+            <div class="form-group">
+                <label for="applicantName">Applicant Name</label>
+                <input type="text" id="applicantName" name="applicantName" required>
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" name="dob" required>
+            </div>
+            <div class="form-group">
+                <label for="depositAmount">Deposit Amount (₹)</label>
+                <input type="number" id="depositAmount" name="depositAmount" required>
+            </div>
+            <div class="form-group">
+                <label for="tenure">Deposit Tenure</label>
+                <select id="tenure" name="tenure" required>
+                    <option value="1">1 Year</option>
+                    <option value="2">2 Years</option>
+                    <option value="3">3 Years</option>
+                    <option value="5">5 Years</option>
+                </select>
+            </div>
+
+            <div class="form-group radio-group">
+                <label>Applicant Type</label><br>
+                <input type="radio" id="individual" name="applicantType" value="individual" checked>
+                <label for="individual">Individual</label>
+                <input type="radio" id="seniorCitizen" name="applicantType" value="seniorCitizen">
+                <label for="seniorCitizen">Senior Citizen (60+)</label>
+            </div>
+
+            <!-- FD-specific Fields (Hidden by Default) -->
+            <div id="fdFields" class="hidden">
+                <button type="button" class="btn" onclick="calculateFDReturns()">Calculate FD Maturity Value</button>
+            </div>
+
+            <!-- RD-specific Fields (Hidden by Default) -->
+            <div id="rdFields" class="hidden">
+                <label for="monthlyInstallment">Monthly Installment (₹)</label>
+                <input type="number" id="monthlyInstallment" name="monthlyInstallment" required>
+                <button type="button" class="btn" onclick="calculateRDReturns()">Calculate RD Maturity Value</button>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-group">
+                <button type="button" class="btn" onclick="submitForm()">Submit Deposit</button>
+            </div>
+        </form>
+
+        <div class="output" id="output">
+            <p><strong>Interest Rate Applied:</strong> <span id="interestRate"></span></p>
+            <p><strong>Estimated Maturity Value (for selected tenure):</strong> ₹<span id="maturityValue"></span></p>
+            <div id="yearlyDetails"></div> <!-- This will show the yearly maturity value -->
+        </div>
+    </div>
+
+    <script>
+        // Load saved entries from local storage when the page loads
+        let allEntries = JSON.parse(localStorage.getItem('depositEntries')) || [];
+
+        // Toggle FD and RD fields based on selection
+        function toggleDepositType() {
+            const depositType = document.querySelector('input[name="depositType"]:checked').value;
+            const fdFields = document.getElementById('fdFields');
+            const rdFields = document.getElementById('rdFields');
+
+            if (depositType === 'fd') {
+                fdFields.classList.remove('hidden');
+                rdFields.classList.add('hidden');
+            } else {
+                fdFields.classList.add('hidden');
+                rdFields.classList.remove('hidden');
+            }
+        }
+
+        // Function to calculate FD returns using quarterly compound interest and display yearly maturity details
+        function calculateFDReturns() {
+            const depositAmount = parseFloat(document.getElementById('depositAmount').value);
+            const tenure = parseInt(document.getElementById('tenure').value);
+            const applicantType = document.querySelector('input[name="applicantType"]:checked').value;
+
+            if (!depositAmount || depositAmount <= 0) {
+                alert('Please enter a valid deposit amount.');
+                return;
+            }
+
+            let interestRate = 0;
+            if (applicantType === 'individual') {
+                switch (tenure) {
+                    case 1: interestRate = 10.50; break;
+                    case 2: interestRate = 11.00; break;
+                    case 3: interestRate = 11.50; break;
+                    case 5: interestRate = 12.00; break;
+                }
+            } else if (applicantType === 'seniorCitizen') {
+                switch (tenure) {
+                    case 1: interestRate = 11.00; break;
+                    case 2: interestRate = 11.50; break;
+                    case 3: interestRate = 12.00; break;
+                    case 5: interestRate = 12.50; break;
+                }
+            }
+
+            // Convert interest rate to decimal
+            interestRate = interestRate / 100;
+
+            // Quarterly compounding formula
+            const n = 4; // Quarterly
+            const maturityValue = depositAmount * Math.pow(1 + interestRate / n, n * tenure);
+
+            // Display results for each year within the selected tenure
+            let yearlyDetails = "";
+            for (let year = 1; year <= tenure; year++) {
+                const yearlyMaturityValue = depositAmount * Math.pow(1 + interestRate / n, n * year);
+                yearlyDetails += `<p><strong>Year ${year}:</strong> ₹${yearlyMaturityValue.toFixed(2)}</p>`;
+            }
+
+            // Display interest rate and maturity value
+            document.getElementById('interestRate').textContent = (interestRate * 100).toFixed(2) + '%';
+            document.getElementById('maturityValue').textContent = maturityValue.toFixed(2);
+            document.getElementById('yearlyDetails').innerHTML = yearlyDetails;
+        }
+
+        // Function to calculate RD returns
+        function calculateRDReturns() {
+            const monthlyInstallment = parseFloat(document.getElementById('monthlyInstallment').value);
+            const tenure = parseInt(document.getElementById('tenure').value);
+            const applicantType = document.querySelector('input[name="applicantType"]:checked').value;
+
+            if (!monthlyInstallment || monthlyInstallment <= 0) {
+                alert('Please enter a valid monthly installment amount.');
+                return;
+            }
+
+            let interestRate = 0;
+            if (applicantType === 'individual') {
+                interestRate = 10.50; // RD rate for individual
+            } else if (applicantType === 'seniorCitizen') {
+                interestRate = 11.00; // RD rate for senior citizen
+            }
+
+            // RD calculation: Using formula for RD maturity value
+            const months = tenure * 12;
+            const maturityValue = monthlyInstallment * ((Math.pow(1 + interestRate / 1200, months) - 1) / (interestRate / 1200)) * (1 + interestRate / 1200);
+
+            // Display results
+            document.getElementById('interestRate').textContent = interestRate + '%';
+            document.getElementById('maturityValue').textContent = maturityValue.toFixed(2);
+        }
+
+        // Function to submit the form, save to Excel, and auto-redirect
+        function submitForm() {
+            const applicantName = document.getElementById('applicantName').value;
+            const dob = document.getElementById('dob').value;
+            const depositAmount = document.getElementById('depositAmount').value;
+            const tenure = document.getElementById('tenure').value;
+            const applicantType = document.querySelector('input[name="applicantType"]:checked').value;
+            const depositType = document.querySelector('input[name="depositType"]:checked').value;
+            const depositDate = new Date();
+            
+            // Calculate maturity date based on deposit date and tenure
+            const maturityDate = new Date(depositDate);
+            maturityDate.setFullYear(depositDate.getFullYear() + parseInt(tenure));  // Adding tenure years
+
+            // Format maturity date as dd-mm-yyyy
+            const maturityDateString = `${maturityDate.getDate().toString().padStart(2, '0')}-${(maturityDate.getMonth() + 1).toString().padStart(2, '0')}-${maturityDate.getFullYear()}`;
+
+            // Calculate maturity value based on deposit type
+            let maturityValue = 0;
+            if (depositType === 'fd') {
+                const interestRate = applicantType === 'individual' ? (tenure === '1' ? 10.5 : 11.0) : 11.5;
+                maturityValue = depositAmount * Math.pow(1 + interestRate / 100, tenure);
+            } else {
+                maturityValue = depositAmount * 1.06; // For simplicity, assume RD maturity multiplier
+            }
+
+            // Store the entry in the allEntries array
+            const newEntry = {
+                applicantName,
+                dob,
+                depositDate: depositDate.toLocaleDateString(),
+                maturityDate: maturityDateString,
+                depositAmount,
+                maturityAmount: maturityValue.toFixed(2),
+                category: depositType === 'fd' ? 'Fixed Deposit' : 'Recurring Deposit'
+            };
+
+            // Store in localStorage
+            allEntries.push(newEntry);
+            localStorage.setItem('depositEntries', JSON.stringify(allEntries));
+
+            // Auto-save to Excel
+            saveToExcel();
+
+            alert('Your deposit has been submitted and saved successfully!');
+            window.location.href = 'new.html'; // Redirect to the thank you page
+            window.location.href = 'pdf.html'; // Redirect to the thank you page
+        }
+
+        // Function to save all entries to Excel
+        function saveToExcel() {
+            // Prepare data in an array for Excel
+            const data = [
+                ['Applicant Name', 'Date of Birth', 'Entry Date', 'Maturity Date', 'Deposit Amount (₹)', 'Maturity Amount (₹)', 'Category']
+            ];
+            allEntries.forEach(entry => {
+                data.push([entry.applicantName, entry.dob, entry.depositDate, entry.maturityDate, entry.depositAmount, entry.maturityAmount, entry.category]);
+            });
+
+            // Create a new Excel file using the xlsx library
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Deposits');
+
+            // Save the file
+            XLSX.writeFile(wb, 'Deposits.xlsx');
+        }
+    </script>
+</body>
+</html>
